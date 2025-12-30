@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サイコロ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .dice {
+            width: 150px;
+            height: 150px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 20px;
+            margin: 30px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 80px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .dice.rolling {
+            animation: roll 0.5s ease-in-out;
+        }
+
+        @keyframes roll {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(90deg);
+            }
+            50% {
+                transform: rotate(180deg);
+            }
+            75% {
+                transform: rotate(270deg);
+            }
+        }
+
+        .dice-dots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            width: 120px;
+            height: 120px;
+        }
+
+        .dot {
+            width: 20px;
+            height: 20px;
+            background: #333;
+            border-radius: 50%;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #666;
+            min-height: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 サイコロ 🎲</h1>
+
+        <div class="dice" id="dice">
+            <div class="dice-dots" id="diceDots"></div>
+        </div>
+
+        <button id="rollButton" onclick="rollDice()">サイコロを振る</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        let currentNumber = 1;
+
+        // サイコロの目のパターン（ドットの位置）
+        const dicePatterns = {
+            1: [4], // 中央
+            2: [0, 8], // 左上と右下
+            3: [0, 4, 8], // 左上、中央、右下
+            4: [0, 2, 6, 8], // 四隅
+            5: [0, 2, 4, 6, 8], // 四隅と中央
+            6: [0, 2, 3, 5, 6, 8] // 左右3つずつ
+        };
+
+        // ページ読み込み時に初期表示
+        window.onload = function() {
+            displayDice(1);
+        };
+
+        function displayDice(number) {
+            const diceDots = document.getElementById('diceDots');
+            diceDots.innerHTML = '';
+
+            const pattern = dicePatterns[number];
+
+            for (let i = 0; i < 9; i++) {
+                const dot = document.createElement('div');
+                if (pattern.includes(i)) {
+                    dot.className = 'dot';
+                }
+                diceDots.appendChild(dot);
+            }
+
+            currentNumber = number;
+        }
+
+        function rollDice() {
+            const dice = document.getElementById('dice');
+            const button = document.getElementById('rollButton');
+            const result = document.getElementById('result');
+
+            // ボタンを無効化
+            button.disabled = true;
+            result.textContent = '';
+
+            // アニメーション開始
+            dice.classList.add('rolling');
+
+            // ランダムな数字を高速で表示
+            let counter = 0;
+            const interval = setInterval(() => {
+                const randomNum = Math.floor(Math.random() * 6) + 1;
+                displayDice(randomNum);
+                counter++;
+
+                if (counter > 10) {
+                    clearInterval(interval);
+                }
+            }, 100);
+
+            // 最終結果を表示
+            setTimeout(() => {
+                const finalNumber = Math.floor(Math.random() * 6) + 1;
+                displayDice(finalNumber);
+                dice.classList.remove('rolling');
+                result.textContent = `出た目: ${finalNumber}`;
+                button.disabled = false;
+            }, 1200);
+        }
+    </script>
+</body>
+</html>
